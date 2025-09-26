@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  turbopack: {
+    // absolute path to your app root
+    root: ".",
+  },
 };
 
 export default nextConfig;
