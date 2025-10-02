@@ -2,7 +2,7 @@ import mongoose, {Schema, model, models } from "mongoose";
 
 export const VIDEO_DIMENSIONS = {
     width: 1080,
-    heigth: 1920,
+    height: 1920,
 }
 export interface IVideo {
     _id?: mongoose.Types.ObjectId;
@@ -25,7 +25,7 @@ const videoSchema = new Schema<IVideo>({
     thembnailUrl: {type: String, required: true},
     controls: {type: Boolean, default: true},
     transformation: {
-        height: {type: Number, default: VIDEO_DIMENSIONS.heigth},
+        height: {type: Number, default: VIDEO_DIMENSIONS.height},
         width: {type: Number, default: VIDEO_DIMENSIONS.width}, 
         quality: {type: Number, min: 1, max: 100 }
     }

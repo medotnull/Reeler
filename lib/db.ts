@@ -1,44 +1,45 @@
-import mongoose from "mongoose";
-import { buffer } from "stream/consumers";
+import mongoose, { Connection } from "mongoose";
 
-const MONGODB_URL = process.env.MONGODB_URL!;
+const MONGODB_URL = process.env.MONGODB_URL as string;
 
 if (!MONGODB_URL) {
-    throw new Error("Please define the mongodb url in the env file");
-
+    throw new Error("Please define MONGODB_URL in your environment");
 }
 
-let cached = global.mongoose;
-//ek global chache mein store karta hai taaki baar baar connection na bane
-//mongoose exist nhi karta toh ek naya object bana deta hai
+type MongooseCache = {
+    conn: Connection | null;
+    promise: Promise<Connection> | null;
+};
 
-if(!cached){
-    cached = global.mongoose = {conn: null, promise: null};
+declare global {
+    var mongoose: MongooseCache;
 }
 
-export async function connectToDB(){
-    if(cached.conn){
+const cached: MongooseCache = global.mongoose || { conn: null, promise: null };
+global.mongoose = cached;
+
+export async function connectToDB(): Promise<Connection> {
+    if (cached.conn) {
         return cached.conn;
     }
-    if(!cached.promise){
+
+    if (!cached.promise) {
         const opts = {
             bufferCommands: true,
-            maxPoolSize: 10
-        }
-    
+            maxPoolSize: 10,
+        } as const;
 
-    cached.promise = mongoose
-        .connect(MONGODB_URL, opts)
-        .then(() => mongoose.connection);
- }
+        cached.promise = mongoose
+            .connect(MONGODB_URL, opts)
+            .then(() => mongoose.connection);
+    }
 
- try {
-    cached.conn = await cached.promise
- }catch(err) {
-    cached.promise = null
-    throw err
- }
- 
- return cached.conn;
- 
+    try {
+        cached.conn = await cached.promise;
+    } catch (err) {
+        cached.promise = null;
+        throw err;
+    }
+
+    return cached.conn;
 }
